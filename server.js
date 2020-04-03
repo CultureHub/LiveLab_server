@@ -18,11 +18,13 @@ var credentials = {
 
 var twilio = require('twilio')
 
-var TWILIO_SID = process.env.TWILIO_SID;
-var TWILIO_AUTH = process.env.TWILIO_AUTH;
+if(process.env.TWILIO_SID) {
+  var TWILIO_SID = process.env.TWILIO_SID;
+  var TWILIO_AUTH = process.env.TWILIO_AUTH;
 
-//var client = new twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH)
-var client = new twilio(TWILIO_SID, TWILIO_AUTH)
+  //var client = new twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH)
+  var client = new twilio(TWILIO_SID, TWILIO_AUTH)
+}
 var portNumber = 6643
 
 
@@ -74,7 +76,7 @@ io.on('connection', function (socket) {
     }
     // Get the list of peers in the room
     var peers = io.nsps['/'].adapter.rooms[room] ?
-      Object.keys(io.nsps['/'].adapter.rooms[room].sockets) : []
+    Object.keys(io.nsps['/'].adapter.rooms[room].sockets) : []
 
     io.of('/').in(room).clients(function (error, clients) {
       if (error) throw error;
@@ -85,13 +87,15 @@ io.on('connection', function (socket) {
     var peerUuids = peers.map(function (socketId) {
       return userFromSocket[socketId]
     })
+    // only use twilio if available
     //------twilio confusions
-    console.log(client)
-    client.api.accounts(TWILIO_SID).tokens
+    //console.log(client)
+    if(process.env.TWILIO_SID) {
+      client.api.accounts(TWILIO_SID).tokens
       .create({})
       .then((token) => {
-        console.log(client)
-        console.log(token.iceServers)
+        // console.log(client)
+        // console.log(token.iceServers)
         // socket.emit('servers', socket.id, token.iceServers)
         socket.emit('ready', socket.id, peerUuids, token.iceServers)
 
@@ -103,6 +107,15 @@ io.on('connection', function (socket) {
         // io.sockets.emit('peers', peerUuids);
         socket.to(thisRoom).emit('new peer', _userData.uuid)
       })
+    } else {
+      socket.emit('ready', socket.id, peerUuids)
+      // And then add the client to the room
+      socket.join(room);
+
+      //send updated list of peers to all clients in room
+      // io.sockets.emit('peers', peerUuids);
+      socket.to(thisRoom).emit('new peer', _userData.uuid)
+    }
     // -----------twilio confusions ends
 
     // Send them to the client
@@ -113,8 +126,8 @@ io.on('connection', function (socket) {
   // client can request updated list of peers
   socket.on("getPeers", function (data) {
     var peers = io.nsps["/"].adapter.rooms[thisRoom] ?
-      Object.keys(io.nsps["/"].adapter.rooms[thisRoom].sockets) :
-      [];
+    Object.keys(io.nsps["/"].adapter.rooms[thisRoom].sockets) :
+    [];
 
     var peerUuids = peers.map(function (socketId) {
       return userFromSocket[socketId];
