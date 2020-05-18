@@ -3,14 +3,16 @@ var express = require('express')
 var browserify = require('browserify-middleware')
 
 require('dotenv').config();
-console.log(process.env);
 
 var app = express();
-//var https = require('https')
 var https = require('https')
+//var http = require('http')
 
-var privateKey = fs.readFileSync(__dirname + '/certs/privkey.pem', 'utf8');
-var certificate = fs.readFileSync(__dirname + '/certs/fullchain.pem', 'utf8');
+// var privateKey = fs.readFileSync(__dirname + '/certs/privkey.pem', 'utf8');
+// var certificate = fs.readFileSync(__dirname + '/certs/fullchain.pem', 'utf8');
+var privateKey = fs.readFileSync(__dirname + '/certs/localhost-key.pem', 'utf8');
+var certificate = fs.readFileSync(__dirname + '/certs/localhost.pem', 'utf8');
+
 var credentials = {
   key: privateKey,
   cert: certificate
@@ -22,20 +24,19 @@ var TWILIO_SID = process.env.TWILIO_SID;
 var TWILIO_AUTH = process.env.TWILIO_AUTH;
 
 //var client = new twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH)
-var client = new twilio(TWILIO_SID, TWILIO_AUTH)
-var portNumber = 6643
+var client = new twilio(TWILIO_SID, TWILIO_AUTH);
 
+var portNumber = process.env.PORT;
 
 //demo for testing streaming
 app.get('/multipeer.js', browserify(__dirname + '/public/lib/multipeer.js'));
+
 var httpsServer = https.createServer(credentials, app);
-//var io = require('socket.io')(httpsServer);
-
-
 var io = require('socket.io')(httpsServer);
 
+
 //crear un servidor en puerto 8000
-httpsServer.listen(portNumber, function () {
+httpsServer.listen(portNumber, () => {
   //print the ip address on the console
   //console.log("server available in https://"+myip.getLocalIP4()+":8000")
   console.log("listening here at port " + portNumber);
@@ -86,12 +87,12 @@ io.on('connection', function (socket) {
       return userFromSocket[socketId]
     })
     //------twilio confusions
-    console.log(client)
+    //console.log(client)
     client.api.accounts(TWILIO_SID).tokens
       .create({})
       .then((token) => {
-        console.log(client)
-        console.log(token.iceServers)
+        //console.log(client)
+        //console.log(token.iceServers)
         // socket.emit('servers', socket.id, token.iceServers)
         socket.emit('ready', socket.id, peerUuids, token.iceServers)
 
@@ -113,8 +114,7 @@ io.on('connection', function (socket) {
   // client can request updated list of peers
   socket.on("getPeers", function (data) {
     var peers = io.nsps["/"].adapter.rooms[thisRoom] ?
-      Object.keys(io.nsps["/"].adapter.rooms[thisRoom].sockets) :
-      [];
+      Object.keys(io.nsps["/"].adapter.rooms[thisRoom].sockets) : [];
 
     var peerUuids = peers.map(function (socketId) {
       return userFromSocket[socketId];
@@ -132,7 +132,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on('signal', function (data) {
-    console.log("forwarding signal " + JSON.stringify(data))
+    //console.log("forwarding signal " + JSON.stringify(data))
     var client = io.sockets.connected[socketFromUser[data.id]];
     client && client.emit('signal', {
       id: userFromSocket[socket.id],
