@@ -24,20 +24,6 @@ function setup() {
   // "Server" es la direccion del servidor para iniciar las conexiones.
   //"room" es la nombre de la sala o el canal
   //"stream" es la referencia al video o lienzo para compartir
-  // parche = new MultiPeer({
-  //   //server: serverName,
-  //   //server: "https://localhost:${PORT}",
-  //   server: "https://livelab.app:6643",
-  //   // server:"https://live-lab-server.glitch.me",
-  //   room: "beta",
-  //   peerOptions: {
-  //     stream: canvasStream
-  //   },
-  //   userData: {
-  //     uuid: Date.now()
-  //   }
-  // })
-
 }
 
 function draw() {
