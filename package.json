@@ -8,7 +8,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "local": "NODE_ENV=localrun node server.js"
+    "local": "NODE_ENV=localrun node server.js",
+    "version": "npm -s run env echo '$npm_package_version'"
   },
   "dependencies": {
     "browserify-middleware": "^8.1.1",
