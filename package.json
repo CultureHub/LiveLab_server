@@ -3,7 +3,7 @@
   "//2": "https://docs.npmjs.com/files/package.json",
   "//3": "updating this file will download and update your packages",
   "name": "LiveLab-server",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "Create your own local server for the livelab software",
   "main": "server.js",
   "scripts": {
