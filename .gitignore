@@ -1,4 +1,4 @@
 node_modules
 .env
-certs/localhost-key.pem
-certs/localhost.pem
+certs
+

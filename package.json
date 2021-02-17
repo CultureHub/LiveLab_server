@@ -4,10 +4,11 @@
   "//3": "updating this file will download and update your packages",
   "name": "LiveLab-server",
   "version": "0.0.2",
-  "description": "Create your own local server for the livelab software?",
+  "description": "Create your own local server for the livelab software",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "local": "NODE_ENV=localrun node server.js"
   },
   "dependencies": {
     "browserify-middleware": "^8.1.1",
@@ -15,6 +16,7 @@
     "express": "^4.17.1",
     "simple-peer": "^9.6.2",
     "socket.io": "^2.3.0",
+    "socket.io-client": "^3.0.3",
     "twilio": "^3.41.1"
   },
   "engines": {

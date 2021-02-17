@@ -6,12 +6,15 @@ require('dotenv').config();
 
 var app = express();
 var https = require('https')
-//var http = require('http')
 
-// var privateKey = fs.readFileSync(__dirname + '/certs/privkey.pem', 'utf8');
-// var certificate = fs.readFileSync(__dirname + '/certs/fullchain.pem', 'utf8');
-var privateKey = fs.readFileSync(__dirname + '/certs/localhost-key.pem', 'utf8');
-var certificate = fs.readFileSync(__dirname + '/certs/localhost.pem', 'utf8');
+//switch between localhost and website SSL credentials using environment variables 
+var privateKey = process.env.NODE_ENV === 'localrun' ?
+  fs.readFileSync(__dirname + '/certs/localhost-key.pem', 'utf8') :
+  fs.readFileSync(__dirname + '/certs/privkey.pem', 'utf8');
+
+var certificate = process.env.NODE_ENV === 'localrun' ?
+  fs.readFileSync(__dirname + '/certs/localhost.pem', 'utf8') :
+  fs.readFileSync(__dirname + '/certs/fullchain.pem', 'utf8');
 
 var credentials = {
   key: privateKey,
@@ -31,7 +34,9 @@ if (process.env.TWILIO_SID) {
   app.get('/multipeer.js', browserify(__dirname + '/public/lib/multipeer.js'));
 
   var httpsServer = https.createServer(credentials, app);
-  var io = require('socket.io')(httpsServer);
+  var io = require('socket.io')(httpsServer, {
+    origins: process.env.CORS,
+  })
 
 
   httpsServer.listen(portNumber, () => {
@@ -94,7 +99,7 @@ if (process.env.TWILIO_SID) {
 
     socket.on('broadcast', function (room, data) {
       // io.sockets.emit('broadcast', data)
-    //  console.log("broadcasting", data, socket.room)
+      //  console.log("broadcasting", data, socket.room)
       //  io.sockets.in(socket.room).emit('broadcast', data)
       socket.to(room).emit('broadcast', data)
 
